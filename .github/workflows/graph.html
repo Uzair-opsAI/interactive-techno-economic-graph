@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-based Protection Cost Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #1a202c;
+        }
+        .container {
+            max-width: 90%;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        #chart {
+            width: 100%;
+            height: 400px;
+        }
+        .slider-container {
+            padding: 1rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .slider {
+            width: 80%;
+            -webkit-appearance: none;
+            height: 8px;
+            background: #d1d5db;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+            border-radius: 5px;
+        }
+        .slider:hover {
+            opacity: 1;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #2563eb;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #2563eb;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .insight-box {
+            background-color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            min-height: 150px;
+        }
+        .insight-title {
+            color: #1d4ed8;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .insight-text {
+            color: #4a5568;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+<div class="container text-center max-w-4xl">
+    <h1 class="text-3xl font-bold mb-6 text-blue-800">Techno-Economic Analysis of AI Protection</h1>
+    <p class="text-lg text-gray-700 mb-8">Move the slider to see the cost-benefit analysis over time.</p>
+
+    <div class="relative w-full">
+        <canvas id="chart"></canvas>
+    </div>
+
+    <div class="slider-container mt-6">
+        <input type="range" min="0" max="8" value="0" step="1" id="yearSlider" class="slider">
+        <div id="yearLabel" class="text-lg font-bold mt-2 text-gray-800">Year: 0</div>
+    </div>
+
+    <div id="insightBox" class="insight-box mt-8 text-left">
+        <div class="insight-title text-xl">Initial Investment</div>
+        <div class="insight-text">
+            <p>At the start, the AI-based O&M cost is slightly higher due to initial setup and installation. There are no cumulative savings yet as the system is just being deployed.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const slider = document.getElementById('yearSlider');
+        const yearLabel = document.getElementById('yearLabel');
+        const insightBox = document.getElementById('insightBox');
+        const canvas = document.getElementById('chart').getContext('2d');
+
+        const originalData = {
+            years: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            traditionalCost: [10, 10, 10, 10, 10, 10, 10, 10, 10],
+            aiCost: [10, 8, 8, 7, 7, 6, 6, 6, 6],
+            savings: [0, 2, 4, 7, 10, 14, 17, 21, 25]
+        };
+
+        const chartConfig = {
+            type: 'line',
+            data: {
+                labels: originalData.years,
+                datasets: [
+                    {
+                        label: 'Traditional O&M Cost',
+                        data: [],
+                        borderColor: '#fbbf24',
+                        backgroundColor: '#fde68a',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        tension: 0.4,
+                        spanGaps: true
+                    },
+                    {
+                        label: 'AI-based O&M Cost',
+                        data: [],
+                        borderColor: '#60a5fa',
+                        backgroundColor: '#bfdbfe',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        tension: 0.4,
+                        spanGaps: true
+                    },
+                    {
+                        label: 'Cumulative Savings with AI',
+                        data: [],
+                        borderColor: '#10b981',
+                        backgroundColor: '#6ee7b7',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        tension: 0.4,
+                        spanGaps: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Cost / Savings (in arbitrary units)',
+                            color: '#4a5568'
+                        },
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.4)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Years',
+                            color: '#4a5568'
+                        },
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.4)'
+                        },
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                }
+            }
+        };
+
+        const myChart = new Chart(canvas, chartConfig);
+
+        const insights = [
+            {
+                title: 'Initial Investment',
+                text: 'At the start, the AI-based O&M cost is slightly higher due to initial setup and installation. There are no cumulative savings yet as the system is just being deployed.'
+            },
+            {
+                title: 'Early Savings',
+                text: 'By year 1, the AI system begins to optimize operations. The AI O&M cost is noticeably lower than the traditional cost, resulting in a small but growing cumulative saving.'
+            },
+            {
+                title: 'Growing Efficiency',
+                text: 'The benefits of AI, such as predictive maintenance and reduced downtime, continue to grow. The gap between AI and traditional costs widens, accelerating cumulative savings.'
+            },
+            {
+                title: 'Accelerating Returns',
+                text: 'The cumulative savings are now substantial. The system has proven its value, and the techno-economic benefits are becoming very clear.'
+            },
+            {
+                title: 'Critical Insight: Break-Even Point Reached!',
+                text: 'This is the key turning point. The cumulative savings from the AI system now equal the initial investment. From this point forward, every dollar saved is pure profit.'
+            },
+            {
+                title: 'Profits from AI',
+                text: 'With the investment fully recovered, the AI system is now generating a significant return. The efficiency gains are at their peak, and O&M costs are at their lowest point.'
+            },
+            {
+                title: 'Sustainable Value',
+                text: 'The AI-based protection system continues to deliver consistent value. The cumulative savings line shows a steep, continued increase, demonstrating the long-term profitability.'
+            },
+            {
+                title: 'Maximizing ROI',
+                text: 'The benefits of AI in O&M are fully realized. The system is operating with maximum efficiency and minimal human intervention, leading to a massive return on investment.'
+            },
+            {
+                title: 'Long-Term Impact',
+                text: 'After 8 years, the cumulative savings from the AI system are immense. This highlights how AI is not just a short-term solution but a foundational technology for long-term financial success and operational stability.'
+            }
+        ];
+
+        slider.oninput = function() {
+            const year = parseInt(this.value);
+            yearLabel.textContent = `Year: ${year}`;
+            insightBox.innerHTML = `
+                <div class="insight-title text-xl">${insights[year].title}</div>
+                <div class="insight-text">${insights[year].text}</div>
+            `;
+            updateChart(year);
+        };
+        
+        function updateChart(year) {
+            myChart.data.datasets[0].data = originalData.traditionalCost.slice(0, year + 1);
+            myChart.data.datasets[1].data = originalData.aiCost.slice(0, year + 1);
+            myChart.data.datasets[2].data = originalData.savings.slice(0, year + 1);
+
+            // Hide points beyond the current year
+            for (let i = 0; i < myChart.data.datasets.length; i++) {
+                const dataset = myChart.data.datasets[i];
+                dataset.pointBackgroundColor = [];
+                dataset.pointBorderColor = [];
+                dataset.pointBorderWidth = [];
+                for (let j = 0; j < dataset.data.length; j++) {
+                    if (j === year) {
+                        dataset.pointBackgroundColor.push(dataset.borderColor);
+                        dataset.pointBorderColor.push(dataset.borderColor);
+                        dataset.pointBorderWidth.push(3);
+                    } else if (j > year) {
+                        dataset.pointBackgroundColor.push('rgba(0,0,0,0)');
+                        dataset.pointBorderColor.push('rgba(0,0,0,0)');
+                        dataset.pointBorderWidth.push(0);
+                    } else {
+                        dataset.pointBackgroundColor.push(dataset.borderColor);
+                        dataset.pointBorderColor.push(dataset.borderColor);
+                        dataset.pointBorderWidth.push(0);
+                    }
+                }
+            }
+            myChart.update();
+        }
+
+        // Initial chart state
+        updateChart(0);
+    });
+</script>
+</body>
+</html>
